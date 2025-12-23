@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Style Transformer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Image Style Transformer</h1>
+      <p>Transform your images into different art styles using AI</p>
+    </header>
+
+    <main>
+      <section class="upload-section">
+        <h2>1. Upload Images</h2>
+        <div class="upload-area" id="uploadArea">
+          <input type="file" id="fileInput" multiple accept="image/*" hidden>
+          <div class="upload-prompt">
+            <p>Click to select images or drag and drop</p>
+            <p class="upload-hint">Up to 20 images (PNG, JPG, WEBP)</p>
+          </div>
+        </div>
+        <div id="fileList" class="file-list"></div>
+      </section>
+
+      <section class="filters-section">
+        <h2>2. Select Filters</h2>
+        <div class="filters-container">
+          <div id="filtersList" class="filters-list"></div>
+          <div class="add-filter">
+            <input type="text" id="newFilterInput" placeholder="Add custom filter...">
+            <button id="addFilterBtn">Add Filter</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="submit-section">
+        <button id="submitBtn" class="submit-btn" disabled>Transform Images</button>
+        <div id="progress" class="progress hidden">
+          <div class="progress-bar">
+            <div id="progressBar" class="progress-fill"></div>
+          </div>
+          <p id="progressText">Processing...</p>
+        </div>
+      </section>
+
+      <section id="resultsSection" class="results-section hidden">
+        <h2>Results</h2>
+        <div id="results" class="results-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Image Modal -->
+  <div id="imageModal" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <img id="modalImage" src="" alt="">
+      <div class="modal-info">
+        <div id="modalTitle" class="modal-title"></div>
+        <button id="modalDownloadBtn" class="modal-download-btn">Download</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
