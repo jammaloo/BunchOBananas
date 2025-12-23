@@ -62,6 +62,8 @@ The application will be available at `http://localhost:3000`
 
 ## How to Use
 
+### Web Interface
+
 1. Open the web app in your browser
 2. Upload one or more images (PNG, JPG, or WEBP)
 3. Select which filters you want to apply (default filters are pre-selected)
@@ -69,6 +71,38 @@ The application will be available at `http://localhost:3000`
 5. Click "Transform Images"
 6. Wait for processing to complete
 7. View and download your transformed images
+
+### CLI (Command Line)
+
+Transform a single image with a custom prompt:
+
+```bash
+pnpm run transform <image-path> "<prompt>"
+```
+
+**Examples:**
+
+```bash
+# Remove something from an image
+pnpm run transform photo.jpg "Remove the girl in the background"
+
+# Apply a specific style
+pnpm run transform landscape.png "Convert this image into the style of Baroque art"
+
+# Make creative edits
+pnpm run transform selfie.jpg "Add a sunset in the background"
+```
+
+**Output:**
+- The transformed image is saved in the same directory as the input
+- Filename format: `original-name-transformed-TIMESTAMP.png`
+- Example: `photo-transformed-2025-12-23T15-30-45-123Z.png`
+
+**Features:**
+- Automatic retry (up to 3 attempts) on API failures
+- Works with PNG, JPG, JPEG, and WEBP images
+- Custom prompts for any kind of transformation
+- Progress logging during processing
 
 ## Deployment
 
