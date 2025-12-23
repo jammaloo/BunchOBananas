@@ -7,7 +7,6 @@ const DEFAULT_FILTERS = [
   'Renaissance',
   'Pop Art',
   'Baroque',
-  'Stone Age',
   'Romanticism',
   'Neoclassicism'
 ];
@@ -15,6 +14,8 @@ const DEFAULT_FILTERS = [
 // State
 let uploadedFiles = [];
 let selectedFilters = new Set(DEFAULT_FILTERS);
+let currentGalleryImages = [];
+let currentImageIndex = -1;
 
 // DOM Elements
 const uploadArea = document.getElementById('uploadArea');
@@ -222,6 +223,20 @@ function downloadImage(imageData, mimeType, originalName, filter) {
   document.body.removeChild(link);
 }
 
+function downloadResultImage(url, originalName, filter) {
+  const link = document.createElement('a');
+  link.href = url;
+
+  // Generate filename: remove extension from original name and add filter
+  const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
+  const filename = `${nameWithoutExt}-${filter.replace(/\s+/g, '_')}.png`;
+  link.download = filename;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 function displayResults(resultsList, galleryUrl) {
   resultsSection.classList.remove('hidden');
 
@@ -250,23 +265,22 @@ function displayResults(resultsList, galleryUrl) {
     }
 
     const imageId = `result-img-${index}`;
-    const imageSrc = `data:${result.mimeType};base64,${result.imageData}`;
 
     return `
       <div class="result-card">
         <img id="${imageId}"
-             src="${imageSrc}"
+             src="${result.thumbnailUrl}"
              alt="${result.originalName} - ${result.filter}"
              data-title="${result.originalName} - ${result.filter}"
+             data-url="${result.url}"
              data-filename="${result.originalName}"
              data-filter="${result.filter}"
-             data-mimetype="${result.mimeType}"
              title="Click to view larger"
              style="cursor: pointer;">
         <div class="card-info">
           <div class="card-title">${result.originalName}</div>
           <div class="card-filter">${result.filter}</div>
-          <button class="download-btn" onclick="downloadImage('${result.imageData}', '${result.mimeType}', '${result.originalName}', '${result.filter}')">
+          <button class="download-btn" onclick="downloadResultImage('${result.url}', '${result.originalName}', '${result.filter}')">
             Download
           </button>
         </div>
@@ -281,15 +295,13 @@ function displayResults(resultsList, galleryUrl) {
       const imgElement = document.getElementById(imageId);
       if (imgElement) {
         imgElement.addEventListener('click', function() {
-          const imageSrc = this.src;
+          const url = this.dataset.url;
           const title = this.dataset.title;
-          const imageData = result.imageData;
-          const mimeType = this.dataset.mimetype;
           const originalName = this.dataset.filename;
           const filter = this.dataset.filter;
 
-          openModal(imageSrc, title, () => {
-            downloadImage(imageData, mimeType, originalName, filter);
+          openModal(url, title, () => {
+            downloadResultImage(url, originalName, filter);
           });
         });
       }
@@ -358,6 +370,7 @@ function displayGallery(gallery) {
               imageData.push({
                 id: imageId,
                 url: image.url,
+                thumbnailUrl: image.thumbnailUrl,
                 filename: image.filename,
                 filter: filterName
               });
@@ -366,9 +379,10 @@ function displayGallery(gallery) {
               return `
                 <div class="gallery-card">
                   <img id="${imageId}"
-                       src="${image.url}"
+                       src="${image.thumbnailUrl}"
                        alt="${image.filename}"
                        data-url="${image.url}"
+                       data-thumbnail="${image.thumbnailUrl}"
                        data-filename="${image.filename}"
                        data-filter="${filterName}"
                        title="Click to view larger"
@@ -390,8 +404,11 @@ function displayGallery(gallery) {
 
   results.innerHTML = galleryHTML || '<p style="text-align: center; padding: 40px; color: #999;">No images found in this gallery.</p>';
 
+  // Store images globally for navigation
+  currentGalleryImages = imageData;
+
   // Add click handlers to gallery images
-  imageData.forEach(data => {
+  imageData.forEach((data, index) => {
     const imgElement = document.getElementById(data.id);
     if (imgElement) {
       imgElement.addEventListener('click', function() {
@@ -400,9 +417,9 @@ function displayGallery(gallery) {
         const filter = this.dataset.filter;
         const title = `${filename} - ${filter.replace(/_/g, ' ')}`;
 
-        openModal(url, title, () => {
+        openModalWithNavigation(url, title, () => {
           downloadGalleryImage(url, filename);
-        });
+        }, index, currentGalleryImages);
       });
     }
   });
@@ -445,6 +462,8 @@ function closeModal() {
   const modal = document.getElementById('imageModal');
   modal.classList.add('hidden');
   document.removeEventListener('keydown', handleEscapeKey);
+  document.removeEventListener('keydown', handleNavigationKeys);
+  currentImageIndex = -1;
 }
 
 function handleEscapeKey(e) {
@@ -453,10 +472,78 @@ function handleEscapeKey(e) {
   }
 }
 
+// Modal with navigation support
+function openModalWithNavigation(imageSrc, title, downloadCallback, index, images) {
+  currentImageIndex = index;
+
+  const modal = document.getElementById('imageModal');
+  const modalImage = document.getElementById('modalImage');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalDownloadBtn = document.getElementById('modalDownloadBtn');
+  const modalOverlay = modal.querySelector('.modal-overlay');
+
+  modalImage.src = imageSrc;
+  modalTitle.textContent = title;
+
+  // Update download button handler
+  modalDownloadBtn.onclick = downloadCallback;
+
+  // Show modal
+  modal.classList.remove('hidden');
+
+  // Close on overlay click
+  modalOverlay.onclick = closeModal;
+
+  // Add keyboard navigation
+  document.removeEventListener('keydown', handleEscapeKey);
+  document.addEventListener('keydown', handleNavigationKeys);
+}
+
+function handleNavigationKeys(e) {
+  if (e.key === 'Escape') {
+    closeModal();
+  } else if (e.key === 'ArrowLeft') {
+    navigateToPrevious();
+  } else if (e.key === 'ArrowRight') {
+    navigateToNext();
+  }
+}
+
+function navigateToPrevious() {
+  if (currentImageIndex > 0 && currentGalleryImages.length > 0) {
+    currentImageIndex--;
+    const image = currentGalleryImages[currentImageIndex];
+    updateModalImage(image);
+  }
+}
+
+function navigateToNext() {
+  if (currentImageIndex < currentGalleryImages.length - 1 && currentGalleryImages.length > 0) {
+    currentImageIndex++;
+    const image = currentGalleryImages[currentImageIndex];
+    updateModalImage(image);
+  }
+}
+
+function updateModalImage(image) {
+  const modalImage = document.getElementById('modalImage');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalDownloadBtn = document.getElementById('modalDownloadBtn');
+
+  const title = `${image.filename} - ${image.filter.replace(/_/g, ' ')}`;
+
+  modalImage.src = image.url;
+  modalTitle.textContent = title;
+  modalDownloadBtn.onclick = () => {
+    downloadGalleryImage(image.url, image.filename);
+  };
+}
+
 // Make functions global for inline event handlers
 window.removeFile = removeFile;
 window.removeFilter = removeFilter;
 window.downloadImage = downloadImage;
+window.downloadResultImage = downloadResultImage;
 window.downloadGalleryImage = downloadGalleryImage;
 window.openModal = openModal;
 window.closeModal = closeModal;

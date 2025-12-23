@@ -3,6 +3,7 @@ import express from 'express';
 import multer from 'multer';
 import basicAuth from 'express-basic-auth';
 import { GoogleGenAI } from '@google/genai';
+import sharp from 'sharp';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'url';
@@ -49,8 +50,8 @@ if (!fs.existsSync('outputs')) {
   fs.mkdirSync('outputs');
 }
 
-// Helper function to save transformed image
-function saveTransformedImage(imageData, originalName, filter, sessionTimestamp) {
+// Helper function to save transformed image and create thumbnail
+async function saveTransformedImage(imageData, originalName, filter, sessionTimestamp) {
   try {
     // sessionTimestamp is already in the correct format (e.g., "2025-12-23-14-30-45-123")
     const dateFolder = sessionTimestamp;
@@ -69,11 +70,23 @@ function saveTransformedImage(imageData, originalName, filter, sessionTimestamp)
     const filename = `${nameWithoutExt}-${filter.replace(/\s+/g, '_')}.png`;
     const outputPath = path.join(outputDir, filename);
 
-    // Convert base64 to buffer and save
+    // Convert base64 to buffer and save full-size image
     const buffer = Buffer.from(imageData, 'base64');
     fs.writeFileSync(outputPath, buffer);
 
-    console.log(`Saved: ${outputPath}`);
+    // Create and save thumbnail (260x280, maintaining aspect ratio)
+    const thumbnailFilename = `${nameWithoutExt}-${filter.replace(/\s+/g, '_')}-thumb.png`;
+    const thumbnailPath = path.join(outputDir, thumbnailFilename);
+
+    await sharp(buffer)
+      .resize(260, 280, {
+        fit: 'cover',
+        position: 'center'
+      })
+      .png()
+      .toFile(thumbnailPath);
+
+    console.log(`Saved: ${outputPath} and thumbnail`);
     return outputPath;
   } catch (error) {
     console.error('Error saving image:', error);
@@ -180,7 +193,8 @@ app.post('/api/transform', upload.array('images', 20), async (req, res) => {
     const taskResults = await Promise.allSettled(tasks.map(task => task.promise));
 
     // Collect results
-    tasks.forEach((task, index) => {
+    for (let index = 0; index < tasks.length; index++) {
+      const task = tasks[index];
       const result = taskResults[index];
 
       if (result.status === 'fulfilled' && result.value.success) {
@@ -188,17 +202,28 @@ app.post('/api/transform', upload.array('images', 20), async (req, res) => {
 
         // Save the transformed image to disk
         try {
-          saveTransformedImage(transformedImageData, task.file.originalname, task.filter, sessionTimestamp);
+          await saveTransformedImage(transformedImageData, task.file.originalname, task.filter, sessionTimestamp);
+
+          // Generate URLs for the saved images
+          const filterFolder = task.filter.replace(/\s+/g, '_');
+          const nameWithoutExt = task.file.originalname.replace(/\.[^/.]+$/, '');
+          const filename = `${nameWithoutExt}-${task.filter.replace(/\s+/g, '_')}.png`;
+          const thumbnailFilename = `${nameWithoutExt}-${task.filter.replace(/\s+/g, '_')}-thumb.png`;
+
+          results.push({
+            originalName: task.file.originalname,
+            filter: task.filter,
+            url: `/api/gallery/${sessionTimestamp}/${filterFolder}/${filename}`,
+            thumbnailUrl: `/api/gallery/${sessionTimestamp}/${filterFolder}/${thumbnailFilename}`
+          });
         } catch (saveError) {
           console.error(`Error saving ${task.file.originalname} with ${task.filter}:`, saveError);
+          results.push({
+            originalName: task.file.originalname,
+            filter: task.filter,
+            error: 'Failed to save image'
+          });
         }
-
-        results.push({
-          originalName: task.file.originalname,
-          filter: task.filter,
-          imageData: transformedImageData,
-          mimeType: 'image/png'
-        });
       } else {
         const errorMessage = result.status === 'fulfilled'
           ? result.value.error
@@ -211,7 +236,7 @@ app.post('/api/transform', upload.array('images', 20), async (req, res) => {
           error: errorMessage
         });
       }
-    });
+    }
 
     // Clean up uploaded files
     files.forEach(file => {
@@ -258,11 +283,18 @@ app.get('/api/gallery/:timestamp', (req, res) => {
     filterDirs.forEach(filterName => {
       const filterPath = path.join(galleryPath, filterName);
       const images = fs.readdirSync(filterPath)
-        .filter(file => file.match(/\.(png|jpg|jpeg|webp)$/i))
-        .map(filename => ({
-          filename,
-          url: `/api/gallery/${timestamp}/${filterName}/${filename}`
-        }));
+        .filter(file => file.match(/\.(png|jpg|jpeg|webp)$/i) && !file.includes('-thumb')) // Exclude thumbnails
+        .map(filename => {
+          // Generate thumbnail filename
+          const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
+          const thumbnailFilename = `${nameWithoutExt}-thumb.png`;
+
+          return {
+            filename,
+            url: `/api/gallery/${timestamp}/${filterName}/${filename}`,
+            thumbnailUrl: `/api/gallery/${timestamp}/${filterName}/${thumbnailFilename}`
+          };
+        });
 
       gallery.filters[filterName] = images;
     });
