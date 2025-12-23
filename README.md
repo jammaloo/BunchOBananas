@@ -138,7 +138,7 @@ npm install -g pm2
 
 **Start the app:**
 ```bash
-pm2 start ecosystem.config.js
+pm2 start ecosystem.config.cjs
 ```
 
 **Useful PM2 commands:**
