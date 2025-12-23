@@ -127,7 +127,37 @@ When enabled, users will be prompted for username/password when accessing the ap
 
 For production deployment:
 
-### Option 1: Direct Deployment (Simplest)
+### Option 1: PM2 Process Manager (Recommended)
+
+PM2 keeps your app running, restarts it on crashes, and starts on system boot.
+
+**Install PM2:**
+```bash
+npm install -g pm2
+```
+
+**Start the app:**
+```bash
+pm2 start ecosystem.config.js
+```
+
+**Useful PM2 commands:**
+```bash
+pm2 list                    # Show all running apps
+pm2 logs image-transformer  # View logs
+pm2 restart image-transformer  # Restart app
+pm2 stop image-transformer     # Stop app
+pm2 delete image-transformer   # Remove from PM2
+pm2 monit                   # Monitor resources
+```
+
+**Start PM2 on system boot:**
+```bash
+pm2 startup
+pm2 save
+```
+
+### Option 2: Direct Deployment (Simple)
 
 1. Set up your `.env` file with API key and basic auth credentials
 2. Run the Node.js server:
@@ -136,7 +166,7 @@ For production deployment:
    ```
 3. The app is now protected with basic auth
 
-### Option 2: With Nginx Reverse Proxy
+### Option 3: With Nginx Reverse Proxy
 
 If you want to use nginx for SSL/TLS or additional features:
 
