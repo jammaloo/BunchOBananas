@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import express from 'express';
 import multer from 'multer';
+import basicAuth from 'express-basic-auth';
 import { GoogleGenAI } from '@google/genai';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -25,6 +26,19 @@ const upload = multer({
 
 // Middleware
 app.use(express.json());
+
+// Basic Auth (if credentials are configured)
+if (process.env.BASIC_AUTH_USER && process.env.BASIC_AUTH_PASSWORD) {
+  app.use(basicAuth({
+    users: { [process.env.BASIC_AUTH_USER]: process.env.BASIC_AUTH_PASSWORD },
+    challenge: true,
+    realm: 'Image Style Transformer'
+  }));
+  console.log('Basic authentication enabled');
+} else {
+  console.log('Warning: Basic authentication not configured (set BASIC_AUTH_USER and BASIC_AUTH_PASSWORD in .env)');
+}
+
 app.use(express.static('public'));
 
 // Ensure uploads and outputs directories exist

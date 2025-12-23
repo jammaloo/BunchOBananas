@@ -29,11 +29,17 @@ npm install
 cp .env.example .env
 ```
 
-3. Add your Gemini API key to the `.env` file:
+3. Add your Gemini API key and configure basic auth in the `.env` file:
 ```
 GEMINI_API_KEY=your_actual_api_key_here
 PORT=3000
+
+# Basic Authentication (optional - leave empty to disable)
+BASIC_AUTH_USER=admin
+BASIC_AUTH_PASSWORD=your_secure_password_here
 ```
+
+**Note:** Basic auth is optional. If you don't set `BASIC_AUTH_USER` and `BASIC_AUTH_PASSWORD`, the app will run without authentication.
 
 ### Getting a Gemini API Key
 
@@ -104,21 +110,40 @@ pnpm run transform selfie.jpg "Add a sunset in the background"
 - Custom prompts for any kind of transformation
 - Progress logging during processing
 
+## Security
+
+### Built-in Basic Authentication
+
+The app includes built-in HTTP Basic Authentication. Simply set credentials in your `.env` file:
+
+```bash
+BASIC_AUTH_USER=admin
+BASIC_AUTH_PASSWORD=your_secure_password
+```
+
+When enabled, users will be prompted for username/password when accessing the app.
+
 ## Deployment
 
-For production deployment with nginx and basic auth:
+For production deployment:
 
-1. Build and run the Node.js server
-2. Configure nginx as a reverse proxy
-3. Add basic auth in nginx configuration:
+### Option 1: Direct Deployment (Simplest)
+
+1. Set up your `.env` file with API key and basic auth credentials
+2. Run the Node.js server:
+   ```bash
+   npm start
+   ```
+3. The app is now protected with basic auth
+
+### Option 2: With Nginx Reverse Proxy
+
+If you want to use nginx for SSL/TLS or additional features:
 
 ```nginx
 server {
     listen 80;
     server_name your-domain.com;
-
-    auth_basic "Restricted Access";
-    auth_basic_user_file /etc/nginx/.htpasswd;
 
     location / {
         proxy_pass http://localhost:3000;
@@ -131,10 +156,7 @@ server {
 }
 ```
 
-4. Create password file:
-```bash
-sudo htpasswd -c /etc/nginx/.htpasswd username
-```
+**Note:** Basic auth is now handled by the Express app, so you don't need nginx's `auth_basic` unless you want an additional layer.
 
 ## API Endpoints
 

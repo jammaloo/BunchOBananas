@@ -1,3 +1,11 @@
+:root {
+  --primary: #034C53;
+  --secondary: #007074;
+  --accent: #F38C79;
+  --background: #FFC1B4;
+  --white: #FFFFFF;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -6,7 +14,7 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--background);
   min-height: 100vh;
   padding: 20px;
 }
@@ -14,15 +22,15 @@ body {
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  background: white;
+  background: var(--white);
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
 header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: var(--white);
   padding: 40px;
   text-align: center;
 }
@@ -52,29 +60,29 @@ h2 {
 }
 
 .upload-area {
-  border: 3px dashed #667eea;
+  border: 3px dashed var(--secondary);
   border-radius: 8px;
   padding: 60px 20px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: #f8f9ff;
+  background: #f8fffe;
 }
 
 .upload-area:hover {
-  border-color: #764ba2;
-  background: #f0f2ff;
+  border-color: var(--accent);
+  background: #f0fffe;
 }
 
 .upload-area.drag-over {
-  border-color: #764ba2;
-  background: #e8ebff;
+  border-color: var(--accent);
+  background: #e8fffe;
   transform: scale(1.02);
 }
 
 .upload-prompt p {
   font-size: 1.1em;
-  color: #667eea;
+  color: var(--secondary);
   margin: 5px 0;
 }
 
@@ -103,7 +111,7 @@ h2 {
 
 .file-item button {
   background: #ff4757;
-  color: white;
+  color: var(--white);
   border: none;
   padding: 6px 12px;
   border-radius: 4px;
@@ -127,8 +135,8 @@ h2 {
   align-items: center;
   gap: 8px;
   padding: 10px 16px;
-  background: #667eea;
-  color: white;
+  background: var(--secondary);
+  color: var(--white);
   border-radius: 20px;
   font-size: 0.95em;
   cursor: pointer;
@@ -136,19 +144,19 @@ h2 {
 }
 
 .filter-chip:hover {
-  background: #764ba2;
+  background: var(--accent);
   transform: translateY(-2px);
 }
 
 .filter-chip.active {
-  background: #5a67d8;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  background: var(--primary);
+  box-shadow: 0 4px 12px rgba(3, 76, 83, 0.4);
 }
 
 .filter-chip .remove-btn {
   background: rgba(255, 255, 255, 0.3);
   border: none;
-  color: white;
+  color: var(--white);
   width: 20px;
   height: 20px;
   border-radius: 50%;
@@ -178,13 +186,13 @@ h2 {
 
 .add-filter input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: var(--secondary);
 }
 
 .add-filter button {
   padding: 12px 24px;
-  background: #667eea;
-  color: white;
+  background: var(--secondary);
+  color: var(--white);
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -193,14 +201,14 @@ h2 {
 }
 
 .add-filter button:hover {
-  background: #764ba2;
+  background: var(--accent);
 }
 
 .submit-btn {
   width: 100%;
   padding: 18px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%);
+  color: var(--white);
   border: none;
   border-radius: 8px;
   font-size: 1.2em;
@@ -211,7 +219,7 @@ h2 {
 
 .submit-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 20px rgba(243, 140, 121, 0.4);
 }
 
 .submit-btn:disabled {
@@ -235,13 +243,13 @@ h2 {
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(90deg, var(--secondary) 0%, var(--accent) 100%);
   transition: width 0.3s ease;
   width: 0%;
 }
 
 #progressText {
-  color: #667eea;
+  color: var(--secondary);
   font-weight: 500;
 }
 
@@ -252,7 +260,7 @@ h2 {
 }
 
 .result-card {
-  background: white;
+  background: var(--white);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -287,7 +295,7 @@ h2 {
 }
 
 .result-card .card-filter {
-  color: #667eea;
+  color: var(--secondary);
   font-size: 0.9em;
   margin-bottom: 10px;
 }
@@ -295,8 +303,8 @@ h2 {
 .download-btn {
   width: 100%;
   padding: 10px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%);
+  color: var(--white);
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -307,7 +315,7 @@ h2 {
 
 .download-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(243, 140, 121, 0.4);
 }
 
 .result-card .card-error {
@@ -325,11 +333,11 @@ h2 {
 }
 
 .filter-heading {
-  color: #667eea;
+  color: var(--secondary);
   font-size: 1.8em;
   margin-bottom: 25px;
   padding-bottom: 10px;
-  border-bottom: 3px solid #667eea;
+  border-bottom: 3px solid var(--accent);
 }
 
 .gallery-grid {
@@ -339,7 +347,7 @@ h2 {
 }
 
 .gallery-card {
-  background: white;
+  background: var(--white);
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -376,13 +384,13 @@ h2 {
 
 /* Gallery link banner */
 .gallery-link-banner {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: var(--white);
   padding: 25px;
   border-radius: 8px;
   text-align: center;
   margin-bottom: 30px;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(3, 76, 83, 0.3);
 }
 
 .gallery-link-banner p {
@@ -392,8 +400,8 @@ h2 {
 
 .gallery-link-btn {
   display: inline-block;
-  background: white;
-  color: #667eea;
+  background: var(--white);
+  color: var(--primary);
   padding: 12px 30px;
   border-radius: 6px;
   text-decoration: none;
@@ -447,7 +455,7 @@ h2 {
   position: relative;
   max-width: 90vw;
   max-height: 90vh;
-  background: white;
+  background: var(--white);
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
@@ -460,7 +468,7 @@ h2 {
   top: 15px;
   right: 15px;
   background: rgba(0, 0, 0, 0.6);
-  color: white;
+  color: var(--white);
   border: none;
   width: 40px;
   height: 40px;
@@ -488,7 +496,7 @@ h2 {
 
 .modal-info {
   padding: 20px;
-  background: white;
+  background: var(--white);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -504,8 +512,8 @@ h2 {
 
 .modal-download-btn {
   padding: 10px 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%);
+  color: var(--white);
   border: none;
   border-radius: 6px;
   cursor: pointer;
@@ -517,5 +525,5 @@ h2 {
 
 .modal-download-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(243, 140, 121, 0.4);
 }
